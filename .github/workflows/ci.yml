@@ -16,19 +16,8 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-    - name: Install dependencies
-      run: pip install pandas numpy requests
-    - name: Validate dataset
-      run: |
-        python -c "
-import pandas as pd
-url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/00291/airfoil_self_noise.dat'
-df = pd.read_csv(url, sep='\t', header=None)
-assert df.shape[0] == 1503, 'Row count mismatch'
-assert df.shape[1] == 6,    'Column count mismatch'
-assert df.isnull().sum().sum() == 0, 'Missing values found'
-print('Data check passed - 1503 rows 6 columns no missing values')
-"
+    - run: pip install pandas numpy requests
+    - run: python tests/test_data.py
 
   model-test:
     name: Model Testing
@@ -39,20 +28,8 @@ print('Data check passed - 1503 rows 6 columns no missing values')
     - uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-    - name: Install dependencies
-      run: pip install numpy scikit-learn
-    - name: Test model pipeline
-      run: |
-        python -c "
-import numpy as np
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LinearRegression
-scaler = StandardScaler()
-X_dummy = np.array([[2000, 5.0, 0.1524, 39.6, 0.0028]])
-X_scaled = scaler.fit_transform(X_dummy)
-print('Model pipeline test passed - preprocessing working')
-print('Input shape:', X_scaled.shape)
-"
+    - run: pip install numpy scikit-learn
+    - run: python tests/test_model.py
 
   api-test:
     name: API Testing
@@ -63,24 +40,8 @@ print('Input shape:', X_scaled.shape)
     - uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-    - name: Install dependencies
-      run: pip install fastapi uvicorn pydantic numpy
-    - name: Test API structure
-      run: |
-        python -c "
-from fastapi import FastAPI
-from pydantic import BaseModel
-app = FastAPI(title='NASA Airfoil Noise Predictor')
-class AirfoilInput(BaseModel):
-    frequency: float
-    angle: float
-    chord_length: float
-    velocity: float
-    suction_thickness: float
-print('API structure test passed')
-print('FastAPI app created successfully')
-print('AirfoilInput schema validated')
-"
+    - run: pip install fastapi pydantic
+    - run: python tests/test_api.py
 
   deploy-ready:
     name: Deploy Ready
@@ -88,12 +49,11 @@ print('AirfoilInput schema validated')
     needs: api-test
     steps:
     - uses: actions/checkout@v4
-    - name: Confirm deployment ready
+    - name: All stages passed
       run: |
         echo '================================'
-        echo 'All pipeline stages passed'
-        echo 'Data    - VALIDATED'
-        echo 'Model   - TESTED'
-        echo 'API     - VERIFIED'
-        echo 'Status  - READY FOR DEPLOYMENT'
+        echo 'Data      - VALIDATED'
+        echo 'Model     - TESTED'
+        echo 'API       - VERIFIED'
+        echo 'Status    - READY FOR DEPLOYMENT'
         echo '================================'

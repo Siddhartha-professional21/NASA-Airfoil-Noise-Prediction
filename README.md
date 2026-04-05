@@ -64,4 +64,4 @@ predicted_sound_level_dB: 125.19, unit: decibels, model: Deep Neural Network, st
 
 ## Dataset
 UCI ML Repository - NASA Airfoil Self-Noise
-https://archive.ics.uci.edu/ml/datasets/Airfoil+Self-Noise
+https://archive.ics.uci.edu/dataset/291/airfoil+self+noise
